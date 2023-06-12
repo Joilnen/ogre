@@ -162,11 +162,9 @@ namespace Ogre {
     //---------------------------------------------------------------------
     void AnimationTrack::removeAllKeyFrames(void)
     {
-        KeyFrameList::iterator i = mKeyFrames.begin();
-
-        for (; i != mKeyFrames.end(); ++i)
+        for (auto *k : mKeyFrames)
         {
-            OGRE_DELETE *i;
+            OGRE_DELETE k;
         }
 
         _keyFrameDataChanged();
@@ -536,11 +534,9 @@ namespace Ogre {
         splines->rotationSpline.clear();
         splines->scaleSpline.clear();
 
-        KeyFrameList::const_iterator i, iend;
-        iend = mKeyFrames.end(); // precall to avoid overhead
-        for (i = mKeyFrames.begin(); i != iend; ++i)
+        for (auto& k : mKeyFrames)
         {
-            TransformKeyFrame* kf = static_cast<TransformKeyFrame*>(*i);
+            auto kf = static_cast<TransformKeyFrame*>(k);
             splines->positionSpline.addPoint(kf->getTranslate());
             splines->rotationSpline.addPoint(kf->getRotation());
             splines->scaleSpline.addPoint(kf->getScale());
@@ -667,7 +663,7 @@ namespace Ogre {
     //---------------------------------------------------------------------
     NodeAnimationTrack* NodeAnimationTrack::_clone(Animation* newParent) const
     {
-        NodeAnimationTrack* newTrack = 
+        NodeAnimationTrack* newTrack =
             newParent->createNodeTrack(mHandle, mTargetNode);
         newTrack->mUseShortestRotationPath = mUseShortestRotationPath;
         populateClone(newTrack);
@@ -677,7 +673,7 @@ namespace Ogre {
     void NodeAnimationTrack::_applyBaseKeyFrame(const KeyFrame* b)
     {
         const TransformKeyFrame* base = static_cast<const TransformKeyFrame*>(b);
-        
+
         for (auto& k : mKeyFrames)
         {
             TransformKeyFrame* kf = static_cast<TransformKeyFrame*>(k);
@@ -685,7 +681,7 @@ namespace Ogre {
             kf->setRotation(base->getRotation().Inverse() * kf->getRotation());
             kf->setScale(kf->getScale() * (Vector3::UNIT_SCALE / base->getScale()));
         }
-            
+
     }
     //--------------------------------------------------------------------------
     VertexAnimationTrack::VertexAnimationTrack(Animation* parent,
@@ -724,11 +720,11 @@ namespace Ogre {
             // Get keyframes
             KeyFrame *kf1, *kf2;
             Real t = getKeyFramesAtTime(timeIndex, &kf1, &kf2);
-            
+
             VertexPoseKeyFrame* vkfOut = static_cast<VertexPoseKeyFrame*>(kf);
             VertexPoseKeyFrame* vkf1 = static_cast<VertexPoseKeyFrame*>(kf1);
             VertexPoseKeyFrame* vkf2 = static_cast<VertexPoseKeyFrame*>(kf2);
-            
+
             // For each pose reference in key 1, we need to locate the entry in
             // key 2 and interpolate the influence
             const VertexPoseKeyFrame::PoseRefList& poseList1 = vkf1->getPoseReferences();
@@ -748,10 +744,10 @@ namespace Ogre {
                 }
                 // Interpolate influence
                 Real influence = startInfluence + t*(endInfluence - startInfluence);
-                
+
                 vkfOut->addPoseReference(p1.poseIndex, influence);
-                
-                
+
+
             }
             // Now deal with any poses in key 2 which are not in key 1
             for (auto& p2 : poseList2)
@@ -769,20 +765,20 @@ namespace Ogre {
                 {
                     // Need to apply this pose too, scaled from 0 start
                     Real influence = t * p2.influence;
-                    
+
                     vkfOut->addPoseReference(p2.poseIndex, influence);
 
                 }
             } // key 2 iteration
-            
-        }           
+
+        }
     }
     //--------------------------------------------------------------------------
     bool VertexAnimationTrack::getVertexAnimationIncludesNormals() const
     {
         if (mAnimationType == VAT_NONE)
             return false;
-        
+
         if (mAnimationType == VAT_MORPH)
         {
             bool normals = false;
@@ -799,7 +795,7 @@ namespace Ogre {
             }
             return normals;
         }
-        else 
+        else
         {
             // needs to derive from Mesh::PoseList, can't tell here
             return false;
@@ -1007,21 +1003,21 @@ namespace Ogre {
     //---------------------------------------------------------------------
     VertexAnimationTrack* VertexAnimationTrack::_clone(Animation* newParent) const
     {
-        VertexAnimationTrack* newTrack = 
+        VertexAnimationTrack* newTrack =
             newParent->createVertexTrack(mHandle, mAnimationType);
         newTrack->mTargetMode = mTargetMode;
         populateClone(newTrack);
         return newTrack;
-    }   
+    }
     //--------------------------------------------------------------------------
     void VertexAnimationTrack::_applyBaseKeyFrame(const KeyFrame* b)
     {
         const VertexPoseKeyFrame* base = static_cast<const VertexPoseKeyFrame*>(b);
-        
+
         for (auto& k : mKeyFrames)
         {
             VertexPoseKeyFrame* kf = static_cast<VertexPoseKeyFrame*>(k);
-            
+
             kf->_applyBaseKeyFrame(base);
         }
     }
