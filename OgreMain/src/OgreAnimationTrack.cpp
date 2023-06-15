@@ -162,11 +162,9 @@ namespace Ogre {
     //---------------------------------------------------------------------
     void AnimationTrack::removeAllKeyFrames(void)
     {
-        KeyFrameList::iterator i = mKeyFrames.begin();
-
-        for (; i != mKeyFrames.end(); ++i)
+        for (auto& a : mKeyFrames)
         {
-            OGRE_DELETE *i;
+            OGRE_DELETE a;
         }
 
         _keyFrameDataChanged();
@@ -536,11 +534,9 @@ namespace Ogre {
         splines->rotationSpline.clear();
         splines->scaleSpline.clear();
 
-        KeyFrameList::const_iterator i, iend;
-        iend = mKeyFrames.end(); // precall to avoid overhead
-        for (i = mKeyFrames.begin(); i != iend; ++i)
+        for (auto& k : mKeyFrames)
         {
-            TransformKeyFrame* kf = static_cast<TransformKeyFrame*>(*i);
+            auto kf = static_cast<TransformKeyFrame *>(k);
             splines->positionSpline.addPoint(kf->getTranslate());
             splines->rotationSpline.addPoint(kf->getRotation());
             splines->scaleSpline.addPoint(kf->getScale());
@@ -549,7 +545,6 @@ namespace Ogre {
         splines->positionSpline.recalcTangents();
         splines->rotationSpline.recalcTangents();
         splines->scaleSpline.recalcTangents();
-
 
         mSplineBuildNeeded = false;
     }
@@ -573,7 +568,7 @@ namespace Ogre {
     //---------------------------------------------------------------------
     bool NodeAnimationTrack::hasNonZeroKeyFrames(void) const
     {
-        for (auto *k : mKeyFrames)
+        for (auto& k : mKeyFrames)
         {
             // look for keyframes which have any component which is non-zero
             // Since exporters can be a little inaccurate sometimes we use a
@@ -609,7 +604,7 @@ namespace Ogre {
         std::list<unsigned short> removeList;
         unsigned short k = 0;
         ushort dupKfCount = 0;
-        for (auto *f : mKeyFrames)
+        for (auto& f : mKeyFrames)
         {
             auto kf = static_cast<TransformKeyFrame*>(f);
             Vector3 newtrans = kf->getTranslate();
